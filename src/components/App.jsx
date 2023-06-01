@@ -8,7 +8,6 @@ export const App = () => {
 
  const handleSearch = (searchImages) => {
    setSearchImages(searchImages);
-   console.log(searchImages);
   }
   
   return (
