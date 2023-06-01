@@ -1,39 +1,38 @@
-import { Component } from "react";
 import { ImageGallery } from "./ImageGallery";
 import { Searchbar } from "./Searchbar";
+import { useState } from "react";
 
-export class App extends Component {
+export const App = () => {
+  const [searchImages, setSearchImages] = useState('');
+  const [page, setPage] = useState(1);
 
-  state = {
-    searchImages: '',
-    page: 1,
-   };
+  // state = {
+  //   searchImages: '',
+  //   page: 1,
+  //  };
 
- 
+
   
-  handleSearch = (searchImages) => {
-    this.setState({searchImages});
-  }
+
   
-  render() {
-  
-    return (
+  return (
     <div
-        style={{
+      style={{
         display: 'grid',
         gridTemplateColumns: '1fr',
         gridGap: '16px',
         paddingBottom: '24px',
         height: '100vh',
         fontSize: 40,
-          color: '#010101'
+        color: '#010101'
        
       }}
-      >
-        <Searchbar handleSearch={ this.handleSearch} />
-        <ImageGallery searchImages={this.state.searchImages} page={this.state.page} />       
-        </div>
-  );  
-  }  
+    >
+      <Searchbar handleSearch={setSearchImages(searchImages)} />
+      <ImageGallery searchImages={searchImages} page={page} />
+    </div>
+  );
 };
+
+
 
