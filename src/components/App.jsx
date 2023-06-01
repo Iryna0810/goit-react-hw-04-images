@@ -6,14 +6,10 @@ export const App = () => {
   const [searchImages, setSearchImages] = useState('');
   const [page, setPage] = useState(1);
 
-  // state = {
-  //   searchImages: '',
-  //   page: 1,
-  //  };
-
-
-  
-
+ const handleSearch = (searchImages) => {
+   setSearchImages(searchImages);
+   console.log(searchImages);
+  }
   
   return (
     <div
@@ -28,7 +24,7 @@ export const App = () => {
        
       }}
     >
-      <Searchbar handleSearch={setSearchImages(searchImages)} />
+      <Searchbar handleSearch={handleSearch} />
       <ImageGallery searchImages={searchImages} page={page} />
     </div>
   );

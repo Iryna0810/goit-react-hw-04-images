@@ -1,108 +1,83 @@
 import { ImageGalleryItem } from "components/ImageGalleryItem";
-import { Component } from "react";
 import { List, Button } from '../styled'
 import { serchPhoto } from "servises/fetch_img";
 import { Vortex } from 'react-loader-spinner';
 import PropTypes from "prop-types";
+import { useState } from "react";
+import { useEffect } from "react";
 
-export class ImageGallery extends Component{
+export const ImageGallery = ({ searchImages, page }) => {
+    const [images, setImages] = useState([]);
+    const [currentImages, setCurrentImages] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
 
-    state = {
-        searchImages: [],
-        currentImages: [],
-        isLoading: false,
-        error: '',
-        currentPage: 1,
+    useEffect(() => {
+        if (!searchImages) return;
+        setIsLoading(true);
+        setImages([]);
+        setCurrentPage(1);
+        serchPhoto(searchImages, page)
+            .then(({ data }) => {
+                setImages(images => [...images, ...data.hits]);
+                setCurrentImages(data.hits)
+            })
+            .catch((error) => setError(error))
+            .finally(() => {
+                setIsLoading(false)
+            })
+
+    }, [page, searchImages]);
+    
+    useEffect(() => {
+        if (!searchImages || currentPage === 1) return;
+        setIsLoading(true);
+        serchPhoto(searchImages, currentPage)
+            .then(({ data }) => {
+                setImages(images => [...images, ...data.hits]);
+                setCurrentImages(data.hits)
+            })
+            .catch((error) => setError(error))
+            .finally(() => {
+                setIsLoading(false)
+            })
+
+    }, [currentPage]);
+
+    const handleMoreLoad = () => {
+        setCurrentPage(prev => prev + 1)
     }
 
-    componentDidUpdate(prevProps, prevState) {
-        const { searchImages, page } = this.props;
-        const { currentPage } = this.state;
-
-        if (prevProps.searchImages !== this.props.searchImages) {
-            this.setState({
-                isLoading: true,
-                searchImages: [],
-            });
-                serchPhoto(searchImages, page)
-                    .then(({ data }) => {    
-                        this.setState(prevState => {
-                            return {
-                                searchImages: [...prevState.searchImages, ...data.hits],
-                                currentImages: data.hits,
-                            }
-                        }             
-                        )
-                    })
-                     .catch((error) => this.setState({error}))
-                     .finally(() => {
-                         this.setState({ isLoading: false })
-                     }
-            )            
-
-        };
-
-        if (prevState.currentPage !== this.state.currentPage) {
-               this.setState({
-                   isLoading: true,
-            }) 
-                serchPhoto(searchImages, currentPage)
-                    .then(({ data }) => {    
-                        this.setState(prevState => {
-                            return {
-                                searchImages: [...prevState.searchImages, ...data.hits],
-                                currentImages: data.hits,
-                            }
-                        }             
-                        )
-                    })
-                     .catch((error) => this.setState({error}))
-                     .finally(() => {
-                         this.setState({ isLoading: false })
-                     }
-            )            
-        }
-    }   
-
-    handleMoreLoad = () => {
-    this.setState(prevState => { return { currentPage: prevState.currentPage + 1 }; }
-    );
-  } 
-
-render() {
-    const { searchImages, isLoading, error, currentImages } = this.state;
-
     return (
-    <>  
+        <>
             <List className="gallery">
                 
-    {isLoading && <Vortex
-    visible={true}
-    height="280"
-    width="280"
-    ariaLabel="vortex-loading"
-    wrapperStyle={{}}
-    wrapperClass="vortex-wrapper"
-    colors={['red', 'green', 'blue', 'yellow', 'orange', 'purple']}
+                {isLoading && <Vortex
+                    visible={true}
+                    height="280"
+                    width="280"
+                    ariaLabel="vortex-loading"
+                    wrapperStyle={{}}
+                    wrapperClass="vortex-wrapper"
+                    colors={['red', 'green', 'blue', 'yellow', 'orange', 'purple']}
                 />}
                 
-        {error && <div>Something went wrong. Try again later</div>}
+                {error && <div>Something went wrong. Try again later</div>}
                 
-        {searchImages && searchImages.map((image) =>
-            <ImageGalleryItem key={image.id} image={image} />)}
+                {images && images.map((image) =>
+                    <ImageGalleryItem key={image.id} image={image} />)}
                 
             </List>
             
-        {currentImages.length> 0 && <Button onClick={this.handleMoreLoad}>Load More</Button>}
+            {currentImages.length > 0 && <Button onClick={handleMoreLoad}>Load More</Button>}
+    
         </>
-        )
-    }
+    )
 };
+
 
 ImageGallery.propTypes = {
     searchImages: PropTypes.string.isRequired,
+    page: PropTypes.number.isRequired,
 };
-
-
-
-    
